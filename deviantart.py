@@ -3,6 +3,12 @@ from bs4 import BeautifulSoup
 import networkx as nx
 from itertools import chain
 from collections import Counter
+import time
+
+start_time=time.clock()
+
+def ProgTime():
+    return "["+str(time.clock()-start_time)+"s] "
 
 def GetUserKeywords(user):
     soup=BeautifulSoup(
@@ -32,6 +38,7 @@ def GetUserFriends(user):
         
 
 def GetDeviationTags(url):
+    print(ProgTime()+"getting deviation tags for "+url)
     soup=BeautifulSoup(
         requests.get(url).text,
         'html.parser'
@@ -73,6 +80,7 @@ def GetTagsForUser(user):
 
 
 def CreateNode(G,user):
+    print(ProgTime()+"creating node "+user)
     G.add_node(user,tags=GetTagsForUser(user))
     # add node returns None
     
@@ -80,7 +88,7 @@ def CreateNode(G,user):
     
 def AddFriends(G,user,depth):
     for friend in GetUserFriends(user):
-        print(friend)
+        print(ProgTime()+friend)
         if friend not in G.nodes:
             CreateNode(G,friend)
             G.add_edge(user,friend)
@@ -91,18 +99,22 @@ def AddFriends(G,user,depth):
 # creating the graph
 
 G=nx.Graph()
+print(ProgTime()+"created graph")
 
-start="axsens"
+start="thekenzai1987"
+
+print(ProgTime()+"creating initial node")
 CreateNode(G,start)
 
 max_depth=2
 
+print(ProgTime()+"beginning recursion")
 AddFriends(G,start,max_depth)
 
 nx.write_gpickle(G,"test.gpickle")
 
-print("nodes: "+str(G.number_of_nodes()))
-print("edges:"+str(G.number_of_edges()))
+print(ProgTime()+"nodes: "+str(G.number_of_nodes()))
+print(ProgTime()+"edges:"+str(G.number_of_edges()))
 
 
     
