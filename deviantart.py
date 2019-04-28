@@ -36,7 +36,10 @@ def GetDeviationTags(url):
         requests.get(url).text,
         'html.parser'
     )
-    return [a.contents[1] for a in soup.find_all(attrs={"class":"discoverytag"})]
+    tags=soup.find(attrs={"class":"dev-about-tags-cc dev-about-breadcrumb"}).find_all(attrs={"class":"discoverytag"})
+    return [a.contents[1] for a in tags]
+
+#<div class="dev-about-tags-cc dev-about-breadcrumb">
 
 def GetDeviations(user):
     # will only grab the first 24, more requires ajax requests which is a pain
@@ -56,7 +59,7 @@ def GetTagsForUser(user):
 
 # print(GetDeviationTags("https://www.deviantart.com/0-2-100/art/CLOSED-Lowblood-Troll-Adopts-Offer-To-Adopt-728467431"))
 
-print(GetTagsForUser("axsens"))
+# print(GetTagsForUser("axsens"))
 
 # a=GetUserFriends("nummypixels")
 # print(len(a))
@@ -66,3 +69,40 @@ print(GetTagsForUser("axsens"))
 # print(GetUserKeywords("aplexpony"))
 
 # print(GetDeviationTags("https://www.deviantart.com/aplexpony/art/Three-faces-of-Rarity-783993670"))
+
+
+
+def CreateNode(G,user):
+    G.add_node(user,tags=GetTagsForUser(user))
+    # add node returns None
+    
+    
+    
+def AddFriends(G,user,depth):
+    for friend in GetUserFriends(user):
+        print(friend)
+        if friend not in G.nodes:
+            CreateNode(G,friend)
+            G.add_edge(user,friend)
+            if(depth>0):
+                AddFriends(G,user,depth-1)
+        
+
+# creating the graph
+
+G=nx.Graph()
+
+start="axsens"
+CreateNode(G,start)
+
+max_depth=2
+
+AddFriends(G,start,max_depth)
+
+nx.write_gpickle(G,"test.gpickle")
+
+print("nodes: "+str(G.number_of_nodes()))
+print("edges:"+str(G.number_of_edges()))
+
+
+    
