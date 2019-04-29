@@ -95,6 +95,12 @@ def AddFriends(G,user,depth):
             if(depth>0):
                 AddFriends(G,user,depth-1)
         
+def WriteJson(G,loc):
+    f=open(loc,"w")
+    f.write(string(nx.node_link_data(G)))
+    f.close()
+
+
 
 # creating the graph
 
@@ -106,15 +112,35 @@ start="thekenzai1987"
 print(ProgTime()+"creating initial node")
 CreateNode(G,start)
 
-max_depth=2
+max_depth=1
 
 print(ProgTime()+"beginning recursion")
 AddFriends(G,start,max_depth)
 
-nx.write_gpickle(G,"test.gpickle")
+nx.write_gexf(G, "test.gexf")
+nx.write_gml(G, "test.gml")
+WriteJson(G,"test.json")
+
+#nx.write_gpickle(G,"test.gpickle")
+# maximum recursion depth exceeded
+
 
 print(ProgTime()+"nodes: "+str(G.number_of_nodes()))
 print(ProgTime()+"edges:"+str(G.number_of_edges()))
 
-
+# Traceback (most recent call last):
+  # File "deviantart.py", line 120, in <module>
+    # nx.write_gexf(G, "test.gexf")
+  # File "<C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\decorator.py:decorator-gen-628>", line 2, in write_gexf
+  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\utils\decorators.py", line 240, in _open_file
+    # result = func_to_be_decorated(*new_args, **kwargs)
+  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\readwrite\gexf.py", line 88, in write_gexf
+    # writer.add_graph(G)
+  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\readwrite\gexf.py", line 315, in add_graph
+    # self.add_nodes(G, graph_element)
+  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\readwrite\gexf.py", line 362, in add_nodes
+    # node_data, default)
+  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\readwrite\gexf.py", line 442, in add_attributes
+    # raise TypeError('attribute value type is not allowed: %s' % val_type)
+# TypeError: attribute value type is not allowed: <class 'collections.Counter'>
     
