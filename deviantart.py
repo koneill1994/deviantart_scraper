@@ -57,7 +57,7 @@ def GetDeviations(user):
     return [a['href'] for a in soup.find_all(attrs={"class":"torpedo-thumb-link"})]
 
 def GetTagsForUser(user):
-    return Counter(list(chain(*[GetDeviationTags(url) for url in GetDeviations(user)])))
+    return dict(Counter(list(chain(*[GetDeviationTags(url) for url in GetDeviations(user)]))))
 
 # use tag similarity as distance metric?
 
@@ -66,7 +66,10 @@ def GetTagsForUser(user):
 
 # print(GetDeviationTags("https://www.deviantart.com/0-2-100/art/CLOSED-Lowblood-Troll-Adopts-Offer-To-Adopt-728467431"))
 
-# print(GetTagsForUser("axsens"))
+# a=GetTagsForUser("axsens")
+
+# print(a)
+# print(type(a))
 
 # a=GetUserFriends("nummypixels")
 # print(len(a))
@@ -121,7 +124,7 @@ nx.write_gexf(G, "test.gexf")
 nx.write_gml(G, "test.gml")
 WriteJson(G,"test.json")
 
-#nx.write_gpickle(G,"test.gpickle")
+# ##### nx.write_gpickle(G,"test.gpickle")
 # maximum recursion depth exceeded
 
 
