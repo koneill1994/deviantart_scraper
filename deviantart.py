@@ -2,8 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 import networkx as nx
 from itertools import chain
-from collections import Counter
+from collections import Counter, deque
 import time
+import matplotlib.pyplot as plt
+import pickle
 
 start_time=time.clock()
 
@@ -88,8 +90,10 @@ def CreateNode(G,user):
     # add node returns None
     
     
-    
+# this is recursive and will eat up memory
+# use the while loop below instead
 def AddFriends(G,user,depth):
+    SaveGraph(G)
     for friend in GetUserFriends(user):
         print(ProgTime()+friend)
         if friend not in G.nodes:
@@ -103,47 +107,54 @@ def WriteJson(G,loc):
     f.write(string(nx.node_link_data(G)))
     f.close()
 
+def DrawGraph(G):
+  nx.draw(G)
+  plt.show()
 
-
+def SaveGraph(G):
+    # nx.write_gpickle(G,"test.gpickle")
+    nx.write_gexf(G, "test.gexf")
+  
 # creating the graph
 
-G=nx.Graph()
-print(ProgTime()+"created graph")
+fromscratch=True
 
-start="thekenzai1987"
+if(fromscratch):
 
-print(ProgTime()+"creating initial node")
-CreateNode(G,start)
+    G=nx.Graph()
+    print(ProgTime()+"created graph")
 
-max_depth=1
+    start="thekenzai1987"
 
-print(ProgTime()+"beginning recursion")
-AddFriends(G,start,max_depth)
-
-nx.write_gexf(G, "test.gexf")
-nx.write_gml(G, "test.gml")
-WriteJson(G,"test.json")
-
-# ##### nx.write_gpickle(G,"test.gpickle")
-# maximum recursion depth exceeded
+    print(ProgTime()+"creating initial node")
+    CreateNode(G,start)
 
 
-print(ProgTime()+"nodes: "+str(G.number_of_nodes()))
-print(ProgTime()+"edges:"+str(G.number_of_edges()))
+    uq=deque()
 
-# Traceback (most recent call last):
-  # File "deviantart.py", line 120, in <module>
-    # nx.write_gexf(G, "test.gexf")
-  # File "<C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\decorator.py:decorator-gen-628>", line 2, in write_gexf
-  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\utils\decorators.py", line 240, in _open_file
-    # result = func_to_be_decorated(*new_args, **kwargs)
-  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\readwrite\gexf.py", line 88, in write_gexf
-    # writer.add_graph(G)
-  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\readwrite\gexf.py", line 315, in add_graph
-    # self.add_nodes(G, graph_element)
-  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\readwrite\gexf.py", line 362, in add_nodes
-    # node_data, default)
-  # File "C:\Users\Kevin\AppData\Local\Programs\Python\Python36-32\lib\site-packages\networkx\readwrite\gexf.py", line 442, in add_attributes
-    # raise TypeError('attribute value type is not allowed: %s' % val_type)
-# TypeError: attribute value type is not allowed: <class 'collections.Counter'>
+    uq.append(start)
+    last="" 
+else:
+    G.read_gexf("test.gexf")
+    [uq,last]=pickle.load( open( "user_queue.", "rb" ) )
+
     
+while len(uq)>0:
+    current=uq.pop()
+    CreateNode(G,current)
+    if len(last): G.add_edge(current,last) # this doesn't necessarily work for all (this is where recursive is better)
+    for friend in GetUserFriends(current):
+        if (friend not in G.nodes) and (friend not in uq):
+            uq.append(friend)
+    pickle.dump([uq,current], open( "user_queue.p", "wb" ))
+    SaveGraph(G)
+    print(ProgTime()+"nodes: "+str(G.number_of_nodes()))
+    print(ProgTime()+"edges:"+str(G.number_of_edges()))
+    last=current
+
+# G=nx.read_gexf("test.gexf")
+
+
+# DrawGraph(G)
+
+
