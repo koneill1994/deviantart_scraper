@@ -86,7 +86,7 @@ def GetTagsForUser(user):
 
 def CreateNode(G,user):
     print(ProgTime()+"creating node "+user)
-    G.add_node(user,tags=GetTagsForUser(user))
+    G.add_node(user,tags=GetTagsForUser(user),checked=False)
     # add node returns None
     
     
@@ -120,7 +120,6 @@ def SaveGraph(G):
 fromscratch=True
 
 if(fromscratch):
-
     G=nx.Graph()
     print(ProgTime()+"created graph")
 
@@ -128,33 +127,82 @@ if(fromscratch):
 
     print(ProgTime()+"creating initial node")
     CreateNode(G,start)
-
-
-    uq=deque()
-
-    uq.append(start)
-    last="" 
-else:
-    G.read_gexf("test.gexf")
-    [uq,last]=pickle.load( open( "user_queue.", "rb" ) )
-
+    current=start 
     
-while len(uq)>0:
-    current=uq.pop()
-    CreateNode(G,current)
-    if len(last): G.add_edge(current,last) # this doesn't necessarily work for all (this is where recursive is better)
+else:
+    G=nx.read_gexf("test.gexf")
+    # uq=pickle.load( open( "user_queue.", "rb" ) )
+    
+# [print(G.nodes[a]) for a in G.nodes]
+    
+while any([not G.nodes[a]['checked'] for a in G.nodes]):
+
     for friend in GetUserFriends(current):
-        if (friend not in G.nodes) and (friend not in uq):
-            uq.append(friend)
-    pickle.dump([uq,current], open( "user_queue.p", "wb" ))
+        if (friend not in G.nodes):
+            CreateNode(G,friend)
+            G.add_edge(current,friend)
+        
+    current['checked']=True
+
+    current = next(i for i in G.nodes if not(G.nodes[i]['checked']))
+    
+    # pickle.dump(uq, open( "user_queue.p", "wb" ))
     SaveGraph(G)
     print(ProgTime()+"nodes: "+str(G.number_of_nodes()))
     print(ProgTime()+"edges:"+str(G.number_of_edges()))
-    last=current
+    # print(ProgTime()+"queue length:"+str(len(uq)))
+    
 
 # G=nx.read_gexf("test.gexf")
 
-
 # DrawGraph(G)
+
+
+# uq (user queue) is a queue
+# with elements representing
+# el[0] : the user to be added
+# el[1] : the user who this is a friend of, should be linked to
+
+# algorithm:
+
+# pop an el off the end of uq
+# create a node off of el[0]
+# if len(el[1])>0: make an edge between el[0] and el[1]
+
+# look up each friend of el[0]
+# if friend is not already a node or in uq
+# add to uq [el[0],el[1]]
+
+# ^ changes to friend search
+# if we've added all of someone's friends
+
+# any([not a['checked'] for a in G.nodes])
+
+# save active state
+
+
+# problem: the uq gets too massive to save in a pickle
+
+# solution: 
+# set an attribute to all nodes called "checked"
+# which determines whether we've added all of that person's friends to the graph
+# all values are initialized as false
+# if we've added all of them we set it to true
+
+
+
+# while any([not a['checked'] for a in G.nodes]):
+
+# for each friend of current, add them as a node
+
+# for friend in GetUserFriends(current):
+    # if (friend not in G.nodes):
+        # CreateNode(G,friend)
+        # G.add_edge(current,friend)
+        
+# current['checked']=True
+
+# current = next(i for i in G.nodes if not(i['checked'])
+
 
 
